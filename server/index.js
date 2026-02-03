@@ -8,8 +8,18 @@ const app = express();
 
 // Middleware
 app.use(express.json());
+const allowedOrigins = (process.env.CLIENT_URL || '')
+  .split(',')
+  .map((s) => s.trim())
+  .filter(Boolean);
+
 app.use(cors({
-    origin: 'https://posts-jade.vercel.app/', // For now, allow all. Once deployed, change this to your Vercel URL.
+    origin: (origin, cb) => {
+        if (!origin) return cb(null, true);
+        if (allowedOrigins.length === 0) return cb(null, true);
+        if (allowedOrigins.includes(origin)) return cb(null, true);
+        return cb(new Error('Not allowed by CORS'));
+    },
     credentials: true
 }));
 
